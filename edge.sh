@@ -2,7 +2,7 @@
 
 DOWNLOAD_DIR=edge/
 
-DIR=${DOWNLOAD_ROOT_DIR}${DOWNLOAD_DIR}
+DIR=${DOWNLOAD_ROOT_DIR:-_downloads/}${DOWNLOAD_DIR}
 
 mkdir -p $DIR
 

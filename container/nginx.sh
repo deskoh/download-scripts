@@ -1,6 +1,6 @@
 #/bin/sh
 
-mkdir -p ${CONTAINER_ROOT_DIR:-./}
+mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
 
 BASE_IMAGE=nginx
 OUT=${CONTAINER_ROOT_DIR}_push_nginx.sh

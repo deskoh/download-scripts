@@ -1,6 +1,6 @@
 #/bin/sh
 
-mkdir -p ${CONTAINER_ROOT_DIR:-./}
+mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
 
 BASE_IMAGE=node
 OUT=${CONTAINER_ROOT_DIR}_push_node.sh
