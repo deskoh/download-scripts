@@ -2,6 +2,14 @@
 
 Scripts to download files and container images for mirroring in AirGap environment.
 
+## Requirements
+
+* `curl`
+
+* `wget`
+
+* `jq`
+
 ## Environment Variables
 
 |       **Key**      | **Default Value** |                **Description**               |
