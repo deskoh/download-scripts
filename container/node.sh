@@ -21,6 +21,7 @@ docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
 
+echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
 echo docker push m.cr.io/$IMAGE >> $OUT
 echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
 echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
@@ -41,6 +42,7 @@ docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
 
+echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
 echo docker push m.cr.io/$IMAGE >> $OUT
 echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
 echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
@@ -61,6 +63,7 @@ docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
 
+echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
 echo docker push m.cr.io/$IMAGE >> $OUT
 echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
 echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
@@ -81,6 +84,7 @@ docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
 
+echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
 echo docker push m.cr.io/$IMAGE >> $OUT
 echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
 echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT

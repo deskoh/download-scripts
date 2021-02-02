@@ -20,4 +20,4 @@ echo Downloading $EXTNAME $VERSION
 curl -sL -o "$DIR/${EXTNAME}-${VERSION}.vsix" $URL
 
 mkdir -p $DIR/latest
-ln -sf "$DIR/${EXTNAME}-${VERSION}.vsix" "$DIR/latest/${EXTNAME}.vsix"
+ln -sf "../${EXTNAME}-${VERSION}.vsix" "$DIR/latest/${EXTNAME}.vsix"
