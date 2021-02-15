@@ -4,7 +4,7 @@ mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
 
 BASE_REGISTRY=registry.redhat.io
 BASE_IMAGE=ubi8/ubi-minimal
-OUT=${CONTAINER_ROOT_DIR}_push_ubi8-minimal.sh
+OUT=${CONTAINER_ROOT_DIR:-_images/}_push_ubi8-minimal.sh
 TAR_NAME=ubi8-ubi-minimal
 
 echo '#!/bin/sh' > $OUT
@@ -19,7 +19,7 @@ VERSION=`curl -s "https://catalog.redhat.com/api/containers/v1/repositories/regi
 IMAGE=${BASE_IMAGE}:${VERSION}
 
 docker tag ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o $CONTAINER_ROOT_DIR$TAR_NAME-$VERSION.tar m.cr.io/$IMAGE
+docker save -o ${CONTAINER_ROOT_DIR:-_images/}$TAR_NAME-$VERSION.tar m.cr.io/$IMAGE
 
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
@@ -38,7 +38,7 @@ echo docker image rm m.cr.io/${BASE_IMAGE}:latest >> $OUT
 # ubi
 
 BASE_IMAGE=ubi8/ubi
-OUT=${CONTAINER_ROOT_DIR}_push_ubi8.sh
+OUT=${CONTAINER_ROOT_DIR:-_images/}_push_ubi8.sh
 TAR_NAME=ubi8-ubi
 
 # e.g. 8.3
@@ -51,7 +51,7 @@ VERSION=`curl -s $URL | jq -r '[.data[] | select(.architecture == "amd64").repos
 IMAGE=${BASE_IMAGE}:${VERSION}
 
 docker tag ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o $CONTAINER_ROOT_DIR$TAR_NAME-$VERSION.tar m.cr.io/$IMAGE
+docker save -o ${CONTAINER_ROOT_DIR:-_images/}$TAR_NAME-$VERSION.tar m.cr.io/$IMAGE
 
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}

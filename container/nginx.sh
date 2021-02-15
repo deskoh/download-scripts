@@ -3,7 +3,7 @@
 mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
 
 BASE_IMAGE=nginx
-OUT=${CONTAINER_ROOT_DIR}_push_nginx.sh
+OUT=${CONTAINER_ROOT_DIR:-_images/}_push_nginx.sh
 
 echo '#!/bin/sh' > $OUT
 
@@ -16,7 +16,7 @@ VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'ngi
 IMAGE=${BASE_IMAGE}:${VERSION}
 
 docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
+docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
@@ -37,7 +37,7 @@ VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'ngi
 IMAGE=${BASE_IMAGE}:${VERSION}
 
 docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
+docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
@@ -58,7 +58,7 @@ VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'ngi
 IMAGE=${BASE_IMAGE}:${VERSION}
 
 docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
+docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
@@ -79,7 +79,7 @@ VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'ngi
 IMAGE=${BASE_IMAGE}:${VERSION}
 
 docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o $CONTAINER_ROOT_DIR$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
+docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
 
 docker image rm m.cr.io/$IMAGE
 docker image rm ${BASE_IMAGE}:${BASE_TAG}
