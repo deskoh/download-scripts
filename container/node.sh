@@ -1,92 +1,28 @@
 #/bin/sh
 
-mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
-
+PRIVATE_REPO=${PRIVATE_REPO:-m.cr.io}
 BASE_IMAGE=node
-OUT=${CONTAINER_ROOT_DIR:-_images/}_push_node.sh
 
-echo '#!/bin/sh' > $OUT
+download () {
+  IMAGE=$BASE_IMAGE:$1
+  TAR_FILENAME=$BASE_IMAGE-$1.tar
 
-#########
+  docker pull ${IMAGE}
+  VERSION=`docker run --rm -i --entrypoint '' ${IMAGE} sh -c 'nginx -v 2>&1 | grep -o [0-9.]*$'`
+  VERSION=`docker run --rm ${IMAGE} --version | grep -o [0-9.]*$`
 
-BASE_TAG=lts-slim
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm node:lts-alpine --version | grep -o [0-9.]*$`-slim
+  PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${VERSION}$2
+  ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$1
 
-IMAGE=${BASE_IMAGE}:${VERSION}
+  ./_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE $3
+}
 
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
+# Optimize download by removing image later
+download "lts-slim" "-slim"
+download "current-slim" "-slim" "-rm"
+docker image rm node:lts-slim
 
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-
-#######
-
-BASE_TAG=lts-alpine
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm node:lts-alpine --version | grep -o [0-9.]*$`-alpine
-
-IMAGE=${BASE_IMAGE}:${VERSION}
-
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-
-#######
-
-BASE_TAG=current-slim
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm node:lts-alpine --version | grep -o [0-9.]*$`-slim
-
-IMAGE=${BASE_IMAGE}:${VERSION}
-
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-
-#######
-
-BASE_TAG=current-alpine
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm node:lts-alpine --version | grep -o [0-9.]*$`-alpine
-
-IMAGE=${BASE_IMAGE}:${VERSION}
-
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
+# Optimize download by removing image later
+download "lts-alpine" "-alpine"
+download "current-alpine" "-alpine" "-rm"
+docker image rm node:lts-alpine

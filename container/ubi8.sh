@@ -1,67 +1,51 @@
 #/bin/sh
 
-mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
+PRIVATE_REPO=${PRIVATE_REPO:-m.cr.io}
 
-BASE_REGISTRY=registry.redhat.io
-BASE_IMAGE=ubi8/ubi-minimal
-OUT=${CONTAINER_ROOT_DIR:-_images/}_push_ubi8-minimal.sh
-TAR_NAME=ubi8-ubi-minimal
+download () {
+  REPO_URL=$1
+  BASE_IMAGE=$2
+  BASE_VERSION=$3
 
-echo '#!/bin/sh' > $OUT
-#########
-# ubi-minimal
-# e.g. 8.3
-BASE_TAG=`curl -s "https://catalog.redhat.com/api/containers/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ubi-minimal/images?include=data.repositories.signatures.tags&page_size=1&page=0" | jq -r '.data[].repositories[0].signatures[0].tags[2]'`
-docker pull ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
-# e.g. 8.3-230
-VERSION=`curl -s "https://catalog.redhat.com/api/containers/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ubi-minimal/images?include=data.repositories.signatures.tags&page_size=1&page=0" | jq -r '.data[].repositories[0].signatures[0].tags[1]'`
+  IMAGE=$REPO_URL/$BASE_IMAGE:$BASE_VERSION
+  TAR_FILENAME=$(echo $BASE_IMAGE | tr / -).tar
 
-IMAGE=${BASE_IMAGE}:${VERSION}
+  docker pull ${IMAGE}
 
-docker tag ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$TAR_NAME-$VERSION.tar m.cr.io/$IMAGE
+  PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${BASE_VERSION}
+  ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$4
 
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
+  ./_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE -rm
+}
 
-echo docker load -i $TAR_NAME-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:latest >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:latest >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:latest >> $OUT
+get_version() {
+  if [[ $TAGS =~ *\"latest\"* ]]; then
+    echo "Latest not found in tags: $TAGS"
+    exit 1
+  fi
 
-#######
-# ubi
+  # e.g. 8.3
+  VERSION=$(echo $TAGS | jq -r '.[0]')
+  if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
+    echo "Unexpected version format: $VERSION"
+    exit 1
+  fi
 
-BASE_IMAGE=ubi8/ubi
-OUT=${CONTAINER_ROOT_DIR:-_images/}_push_ubi8.sh
-TAR_NAME=ubi8-ubi
+  # e.g. 8.3-291
+  FULL_VERSION=$(echo $TAGS | jq -r '.[2]')
+  if ! [[ $FULL_VERSION =~ ^[0-9]+\.[0-9]+-[0-9]+$ ]]; then
+    echo "Unexpected full version format: $FULL_VERSION"
+    exit 1
+  fi
+}
 
-# e.g. 8.3
+
+URL="https://catalog.redhat.com/api/containers/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ubi-minimal/images?include=data.repositories.signatures.tags,data.architecture&page_size=100&page=0"
+TAGS=`curl -s $URL | jq -r '[.data[] | select(.architecture == "amd64").repositories[].signatures[] | select(.tags[] | contains("latest"))][0].tags'`
+get_version $TAGS
+download "registry.access.redhat.com" "ubi8/ubi-minimal" $VERSION $FULL_VERSION
+
 URL="https://catalog.redhat.com/api/containers/v1/repositories/registry/registry.access.redhat.com/repository/ubi8/ubi/images?include=data.repositories.signatures.tags,data.architecture&page_size=100&page=0"
-BASE_TAG=`curl -s $URL | jq -r '[.data[] | select(.architecture == "amd64").repositories[].signatures[] | select(.tags[] | contains("latest"))][0].tags[2]'`
-docker pull ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
-# e.g. 8.3-230
-VERSION=`curl -s $URL | jq -r '[.data[] | select(.architecture == "amd64").repositories[].signatures[] | select(.tags[] | contains("latest"))][0].tags[1]'`
-
-IMAGE=${BASE_IMAGE}:${VERSION}
-
-docker tag ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$TAR_NAME-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $TAR_NAME-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:latest >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:latest >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:latest >> $OUT
+TAGS=`curl -s $URL | jq -r '[.data[] | select(.architecture == "amd64").repositories[].signatures[] | select(.tags[] | contains("latest"))][0].tags'`
+get_version $TAGS
+download "registry.access.redhat.com" "ubi8/ubi" $VERSION $FULL_VERSION

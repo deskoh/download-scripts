@@ -1,35 +1,24 @@
 #/bin/sh
 
-mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
-OUT=${CONTAINER_ROOT_DIR:-_images/}_push_ubi8-node.sh
-echo '#!/bin/sh' > $OUT
+PRIVATE_REPO=${PRIVATE_REPO:-m.cr.io}
 
-BASE_REGISTRY=registry.access.redhat.com
+download () {
+  REPO_URL=$1
+  BASE_IMAGE=$2
 
-#######
+  IMAGE=$REPO_URL/$BASE_IMAGE
+  TAR_FILENAME=$(echo $BASE_IMAGE | tr / -).tar
 
-BASE_IMAGE=ubi8/nodejs-12
-TAR_NAME=ubi8-nodejs-12
+  docker pull ${IMAGE}
+  VERSION=`docker run --rm ${IMAGE} node --version | grep -o [0-9.]*$`
 
-docker pull ${BASE_REGISTRY}/${BASE_IMAGE}
-VERSION=`docker run --rm ${BASE_REGISTRY}/${BASE_IMAGE} node --version | grep -o [0-9.]*$`
+  PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${VERSION}
+  ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:latest
 
-IMAGE=${BASE_IMAGE}:${VERSION}
+  ./_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE $3
+}
 
-docker tag ${BASE_REGISTRY}/${BASE_IMAGE} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$TAR_NAME-$VERSION.tar m.cr.io/$IMAGE
+# Optimize download by removing image later
+download "registry.access.redhat.com" "ubi8/nodejs-12"
 
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_REGISTRY}/${BASE_IMAGE}
-
-echo docker load -i $TAR_NAME-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE} >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:latest >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:latest >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE} >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:latest >> $OUT
-
-#######
+download "registry.access.redhat.com" "ubi8/nodejs-14" -rm

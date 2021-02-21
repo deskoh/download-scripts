@@ -1,92 +1,22 @@
 #/bin/sh
 
-mkdir -p ${CONTAINER_ROOT_DIR:-_images/}
-
+PRIVATE_REPO=${PRIVATE_REPO:-m.cr.io}
 BASE_IMAGE=nginx
-OUT=${CONTAINER_ROOT_DIR:-_images/}_push_nginx.sh
 
-echo '#!/bin/sh' > $OUT
+download () {
+  IMAGE=$BASE_IMAGE:$1
+  TAR_FILENAME=$BASE_IMAGE-$1.tar
 
-#########
+  docker pull ${IMAGE}
+  VERSION=`docker run --rm -i --entrypoint '' ${IMAGE} sh -c 'nginx -v 2>&1 | grep -o [0-9.]*$'`
 
-BASE_TAG=stable
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'nginx -v 2>&1 | grep -o [0-9.]*$'`
+  PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${VERSION}$2
+  ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$1
 
-IMAGE=${BASE_IMAGE}:${VERSION}
+  ./_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE -rm
+}
 
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-
-########
-
-BASE_TAG=stable-alpine
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'nginx -v 2>&1 | grep -o [0-9.]*$'`-alpine
-
-IMAGE=${BASE_IMAGE}:${VERSION}
-
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-
-#######
-
-BASE_TAG=latest
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'nginx -v 2>&1 | grep -o [0-9.]*$'`
-
-IMAGE=${BASE_IMAGE}:${VERSION}
-
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-
-#######
-
-BASE_TAG=alpine
-docker pull ${BASE_IMAGE}:${BASE_TAG}
-VERSION=`docker run --rm -i --entrypoint '' ${BASE_IMAGE}:${BASE_TAG} sh -c 'nginx -v 2>&1 | grep -o [0-9.]*$'`-alpine
-
-IMAGE=${BASE_IMAGE}:${VERSION}
-
-docker tag ${BASE_IMAGE}:${BASE_TAG} m.cr.io/$IMAGE
-docker save -o ${CONTAINER_ROOT_DIR:-_images/}$BASE_IMAGE-$VERSION.tar m.cr.io/$IMAGE
-
-docker image rm m.cr.io/$IMAGE
-docker image rm ${BASE_IMAGE}:${BASE_TAG}
-
-echo docker load -i $BASE_IMAGE-$VERSION.tar >> $OUT
-echo docker push m.cr.io/$IMAGE >> $OUT
-echo docker tag m.cr.io/$IMAGE m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker push m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
-echo docker image rm m.cr.io/$IMAGE >> $OUT
-echo docker image rm m.cr.io/${BASE_IMAGE}:${BASE_TAG} >> $OUT
+download "stable"
+download "stable-alpine" "-alpine"
+download "latest"
+download "alpine" "-alpine"
