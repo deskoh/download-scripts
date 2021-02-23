@@ -7,15 +7,17 @@ BASE_IMAGE=node
 download () {
   IMAGE=$BASE_IMAGE:$1
   TAR_FILENAME=$BASE_IMAGE-$1.tar
+  TAG_SUFFIX=$2
 
   docker pull ${IMAGE}
-  VERSION=`docker run --rm -i --entrypoint '' ${IMAGE} sh -c 'nginx -v 2>&1 | grep -o [0-9.]*$'`
   VERSION=`docker run --rm ${IMAGE} --version | grep -o [0-9.]*$`
+  MAJ_VERSION=`echo $VERSION | cut -f 1 -d .`
 
-  PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${VERSION}$2
-  ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$1
+  PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$1
+  ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${VERSION}$TAG_SUFFIX
+  ALT_PRIVATE_IMAGE_2=${PRIVATE_REPO}/${BASE_IMAGE}:${MAJ_VERSION}$TAG_SUFFIX
 
-  $SCRIPT_DIR/_export_image.sh $3 $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE
+  $SCRIPT_DIR/_export_image.sh $3 $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE $ALT_PRIVATE_IMAGE_2
 }
 
 # Optimize download by removing image later
