@@ -15,7 +15,7 @@ download () {
   PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${VERSION}$2
   ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$1
 
-  $SCRIPT_DIR/_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE $3
+  $SCRIPT_DIR/_export_image.sh $3 $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE
 }
 
 # Optimize download by removing image later
