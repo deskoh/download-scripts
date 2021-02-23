@@ -1,4 +1,5 @@
 #/bin/sh
+SCRIPT_DIR=$(dirname "$0")
 
 PRIVATE_REPO=${PRIVATE_REPO:-m.cr.io}
 
@@ -15,7 +16,7 @@ download () {
   PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${BASE_VERSION}
   ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$4
 
-  ./_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE -rm
+  $SCRIPT_DIR/_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE -rm
 }
 
 get_version() {

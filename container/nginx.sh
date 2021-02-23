@@ -1,7 +1,9 @@
 #/bin/sh
+SCRIPT_DIR=$(dirname "$0")
 
 PRIVATE_REPO=${PRIVATE_REPO:-m.cr.io}
 BASE_IMAGE=nginx
+
 
 download () {
   IMAGE=$BASE_IMAGE:$1
@@ -13,7 +15,7 @@ download () {
   PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:${VERSION}$2
   ALT_PRIVATE_IMAGE=${PRIVATE_REPO}/${BASE_IMAGE}:$1
 
-  ./_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE -rm
+  $SCRIPT_DIR/_export_image.sh $IMAGE $TAR_FILENAME $PRIVATE_IMAGE $ALT_PRIVATE_IMAGE -rm
 }
 
 download "stable"

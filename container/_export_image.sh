@@ -1,6 +1,6 @@
 #!/bin/bash
 # Export image as private repo images and generate script that import and push private repo images.
-# Usage: ./_export_image.sh IMAGE TAR_FILENAME PRIVATE_IMAGE [ALT_PRIVATE_IMAGE] [-rm]
+# Usage: $SCRIPT_DIR/_export_image.s.sh IMAGE TAR_FILENAME PRIVATE_IMAGE [ALT_PRIVATE_IMAGE] [-rm]
 # Options:
 #   -rm: to remove local image after exporting
 

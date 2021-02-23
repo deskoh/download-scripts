@@ -3,9 +3,9 @@ export CONTAINER_ROOT_DIR=_images/
 
 cd $CONTAINER_ROOT_DIR
 
-./container/nginx.sh
-./container/node.sh
-./container/ubi8.sh
+../container/nginx.sh
+../container/node.sh
+../container/ubi8.sh
 
 cd ..
 
