@@ -6,7 +6,7 @@ PRIVATE_REPO=${PRIVATE_REPO:-m.cr.io}
 save () {
   IMAGE=$1
   TAR_FILENAME=$2
-  PRIVATE_IMAGE=${PRIVATE_REPO}/${IMAGE}
+  PRIVATE_IMAGE=${3:-PRIVATE_REPO}/${IMAGE}
 
   $SCRIPT_DIR/_export_image.sh -rm $IMAGE $TAR_FILENAME $PRIVATE_IMAGE
 }
@@ -21,10 +21,9 @@ VERSION=$(curl -s https://api.github.com/repos/k3s-io/k3s/releases/latest \
 
 # Check if k3s-airgap-images-amd64.tar exists
 if [ ! -f k3s-airgap-images-amd64.tar ]; then
-  echo "Downloading k3s-airgap-images-amd64.tar"
-  curl -L -o k3s-airgap-images-amd64.tar
-
   echo Downloading k3s release $VERSION
+
+  echo "Downloading k3s-airgap-images-amd64.tar"
 
   curl -s https://api.github.com/repos/k3s-io/k3s/releases/latest \
     | grep "browser_download_url.*k3s-airgap-images-amd64.tar\"" \
@@ -32,12 +31,12 @@ if [ ! -f k3s-airgap-images-amd64.tar ]; then
     | xargs curl -LO
 
   # Replace string after colon on first line with $TAG
-  sed -i "1s/:.*/:$TAG/" Dockerfile
+  sed -i "1s/:.*/:$TAG/" k3d.Dockerfile
 fi
 
 IMAGE=k3s-airgap:$TAG
 docker build -f k3d.Dockerfile . -t $IMAGE
-save $IMAGE k3s-airgap-$TAG.tar
+save $IMAGE k3s-airgap-$TAG.tar p.cr.io
 
 rm -f k3s-airgap-images-amd64.tar
 
@@ -47,7 +46,7 @@ VERSION=$(curl -s https://api.github.com/repos/rancher/k3d/releases/latest \
   | cut -d '"' -f 4)
 
 # Remove 'v' from $VERSION
-TAG=$(echo $VERSION | sed --expression='s/v//g')
+TAG=${VERSION/v/}
 
 docker pull rancher/k3d-tools:$TAG
 docker pull rancher/k3d-proxy:$TAG
